@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 983629784}
   - component: {fileID: 983629783}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: SerialHandler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
