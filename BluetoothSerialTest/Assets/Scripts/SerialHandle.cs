@@ -12,11 +12,11 @@ public class SerialHandle : MonoBehaviour
     public delegate void SerialDataReceivedEventHandler(string message);
     public event SerialDataReceivedEventHandler OnDataReceived;
 
-    [SerializeField] string PortName = "COMxx";         // ポート名
     [SerializeField] int BaudRate = 9600;               // ボーレート(BluetoothSerialでのボーレートの定義は不明)
 
     private ConcurrentQueue<string> _ReceivedQueue;     // 受信バッファ(Queueのスレッドセーフ版)
 
+    private string _PortName;                           // ポート名
     private SerialPort _Serial;                         // シリアルポート管理
     private Thread _ReadThread;                         // 受信スレッド管理
     private bool _IsRunning = false;                    // 受信スレッドの生存確認フラグ
@@ -24,7 +24,7 @@ public class SerialHandle : MonoBehaviour
     void Awake()
     {
         _ReceivedQueue = new ConcurrentQueue<string>();
-        Open();
+        //Open();
     }
 
     void Update()
@@ -42,18 +42,36 @@ public class SerialHandle : MonoBehaviour
     }
 
     /// <summary>
+    /// 開くポートの選択
+    /// </summary>
+    /// <param name="portName">開きたいポート名</param>
+    public void UpdatePort(string portName)
+    {
+        Close();
+        _PortName = portName;
+        Open();
+    }
+
+    /// <summary>
     /// シリアルポートを開く
     /// </summary>
     private void Open()
     {
-        // シリアルポートの初期化
-        _Serial = new SerialPort(PortName, BaudRate, Parity.None, 8, StopBits.One);
-        _Serial.Open();
+        try
+        {
+            // シリアルポートの初期化
+            _Serial = new SerialPort(_PortName, BaudRate, Parity.None, 8, StopBits.One);
+            _Serial.Open();
 
-        // スレッドの開始処理
-        _IsRunning = true;
-        _ReadThread = new Thread(Read);
-        _ReadThread.Start();
+            // スレッドの開始処理
+            _IsRunning = true;
+            _ReadThread = new Thread(Read);
+            _ReadThread.Start();
+        }
+        catch(System.Exception e)
+        {
+            Debug.LogWarning(e);
+        }
     }
 
     /// <summary>
